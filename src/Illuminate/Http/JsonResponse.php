@@ -7,6 +7,13 @@ class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse {
 	use ResponseTrait;
 
 	/**
+	 * The json encoding options.
+	 *
+	 * @var int
+	 */
+	protected $jsonOptions;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param  mixed  $data
@@ -16,9 +23,24 @@ class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse {
 	*/
 	public function __construct($data = null, $status = 200, $headers = array(), $options = 0)
 	{
+		$this->jsonOptions = $options;
+
 		parent::__construct($data, $status, $headers);
-		$this->encodingOptions = $options;
 	}
+
+        /**
+         * Set the json encoding options and re-encode the response
+         *
+         * @param  int  $options
+         * @return mixed
+         */
+        public function setJsonOptions($options)
+        {
+            $this->jsonOptions = $options;
+            $this->setData($this->getData());
+
+            return $this->update();
+        }
 
 	/**
 	 * Get the json_decoded data from the response
@@ -38,8 +60,8 @@ class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse {
 	public function setData($data = array())
 	{
 		$this->data = $data instanceof JsonableInterface
-                                   ? $data->toJson($this->encodingOptions)
-                                   : json_encode($data, $this->encodingOptions);
+                                   ? $data->toJson($this->jsonOptions)
+                                   : json_encode($data, $this->jsonOptions);
 
 		return $this->update();
 	}
